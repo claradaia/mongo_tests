@@ -1,0 +1,21 @@
+{"_id": 5,
+ "fields":
+   [
+      {
+        "type": "text",
+        "name": "Cidade",
+        "value": "Poti-poti Perna-de-Pau",
+        "description": "Nome da Cidade",
+        "group": "CEP",
+        "public": false
+      },
+      {
+        "type": "text",
+        "name": "Estado",
+        "value": "Paraná",
+        "description": "Nome do Estado",
+        "group": "CEP",
+        "public": false
+      }
+   ]
+}

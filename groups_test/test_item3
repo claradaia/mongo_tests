@@ -1,0 +1,21 @@
+{"_id": 3,
+ "fields":
+   [
+      {
+	"type": "text",
+	"name": "Email",
+	"value": "ponto@lost",
+	"description": "endereço de e-mail",
+	"group": "Contato",
+	"public": false
+      },
+      {
+	"type": "text",
+	"name": "Estado_teste",
+	"value": "Paraná",
+	"description": "Nome do Estado",
+	"group": "CEP",
+	"public": false
+      }
+   ]
+}

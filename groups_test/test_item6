@@ -1,0 +1,21 @@
+{"_id": 6,
+ "fields":
+   [
+      {
+        "type": "integer",
+        "name": "Número de Máquinas",
+        "value": 5,
+        "description": "Inventário",
+        "group": "Inventário",
+        "public": false
+      },
+      {
+        "type": "text",
+        "name": "Estado",
+        "value": "Paraná",
+        "description": "Nome do Estado",
+        "group": "CEP",
+        "public": false
+      }
+   ]
+}

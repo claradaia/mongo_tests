@@ -1,0 +1,23 @@
+{"_id": 101,
+ "fields_spec":
+   [
+      {
+        "type": "text",
+        "name": "Cidade_teste",
+	"key": "cidade_teste",
+        "description": "Nome da Cidade",
+        "group": "CEP",
+        "public": false
+      },
+      {
+        "type": "text",
+        "name": "Telefone",
+        "key": "telefone",
+        "description": "Número do telefone",
+        "group": "Contato",
+        "public": false
+      }
+   ],
+ "cidade_teste": "Olho de vidro",
+ "telefone": "99669696"
+}

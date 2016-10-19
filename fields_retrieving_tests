@@ -1,0 +1,384 @@
+// Only works with Mongo 3.2
+db.points.aggregate([
+    // Get just the docs that contain a fields element where name is 'Cidade'
+    {$match: {'fields.name': 'Cidade'}},
+    {$project: {
+        fields: {$filter: {
+            input: '$fields',
+            as: 'field',
+            cond: {$eq: ['$$field.name', 'Cidade']}
+        }},
+    }}
+])
+
+
+//Works for only one field
+db.points.aggregate([
+    { $match: { 
+         fields: { $elemMatch: {name: "Cidade"} } 
+    }},
+    { $redact : {
+         $cond: {
+          if: { $or : [{ $eq: ["$name","Cidade"] }, { $not : "$name" }]},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}]);
+
+
+//Works for only one field
+db.points.find(
+    {"fields.name": "Cidade"}, 
+    {fields: {$elemMatch: {name: "Cidade"}}});
+
+
+// Doesnt work, "estado" makes no difference
+db.points.find({"fields.name": "Cidade"}, {fields:{$elemMatch:{ $or: [{ $eq: ["$name", "Cidade"] }, { $eq: ["$name", "Estado"] }]}}});
+
+
+// Doesnt work, wrong logic
+db.points.aggregate([
+    { $match: { 
+         fields: { $elemMatch: {name: "Cidade", name: "Estado"} } 
+    }},
+    { $redact : {
+         $cond: {
+          if: {$and: [
+		  {$or : [{ $eq: ["$name","Estado"] }, { $not : "$name" }]}, 
+		  {$or : [{ $eq: ["$name","Cidade"] }, { $not : "$name" }]}]
+	      },
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}]);
+
+// Seems to work!
+db.points.aggregate([
+    { $match: { 
+         fields: { $elemMatch: {name: "Cidade", name: "Estado"} } //this is probably wrong and only works because everyone has Cidade and Estado
+    }},
+    { $redact : {
+         $cond: {
+          if: { $or : [{ $eq: ["$name","Estado"] }, { $eq: ["$name", "Cidade"] }, { $not : "$name" }]},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}]);
+
+db.points.aggregate([
+    { $match: { 
+         fields: { $elemMatch: {name: "Cidade", name: "Estado"} } 
+    }},
+    { $redact : {
+         $cond: {
+          if: { $or : q},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}]);
+
+// Works fine.
+db.points.aggregate([
+    { $match: { 
+	$or: [
+              {'fields.name': 'Cidade'},
+              {'fields.name': 'Estado'}
+	     ]
+    }},
+    { $redact : {
+         $cond: {
+          if: { $or : [{ $eq: ["$name","Estado"] }, { $eq: ["$name", "Cidade"] }, { $not : "$name" }]},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}]);
+
+db.points.aggregate([
+    { $match: {_id : ObjectId("56a9fc092d5409a5afcca276")}},
+    { $redact : {
+         $cond: {
+          if: {},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    	}
+    }
+]);
+
+db.points.aggregate([
+    { $match: { 
+	$or: [
+              {'fields.name': 'Cidade'},
+              {'fields.name': 'Estado'}
+	     ]
+    }}],
+    {explain: true});
+
+
+//Does retrieve nonspecified fields (say, _id, fields, teste, papagaios and whatever else I put there)
+db.points.aggregate([
+    { $match: { 
+              'fields.name': 'País'}
+	 
+    },
+    { $redact : {
+         $cond: {
+          if: { $or : [{ $eq: ["$name", "País"] }, { $not : "$name" }]},
+             then: "$$DESCEND",
+             else: "$$PRUNE"
+         }
+    }}
+    { $project : {_id : 0}
+    }]);
+
+//DONE: find out why aggregation result does not work in function.
+
+db.points.aggregate([
+          { $match: {
+             $or: [
+              {'fields.name': 'Cidade'},
+              {'fields.name': 'Estado'}
+	     ]
+          }},
+          { $redact : {
+           $cond: {
+            if: { $or : [{ $eq: ["$name", "Cidade"] }, { $not : "$name" }, { $eq: ["$name", "Estado"] }]},
+               then: "$$DESCEND",
+               else: "$$PRUNE"
+           }
+          }}]).toArray(function(err, result) {
+            assert.equal(err, null);
+            console.log("result");
+            console.log(result);
+          });
+
+db.points.aggregate([
+          { $match: {
+             $or: [
+              {'fields.name': 'Cidade'},
+              {'fields.name': 'maria'}
+	     ]
+          }}])
+
+db.points.aggregate([
+          { $match: {
+             $or: [
+              {'fields.name': 'Cidade'},
+              {'fields.name': 'maria'}
+	     ]
+          }},
+          { $redact : {
+           $cond: {
+            if: { $or : [{ $eq: ["$name", "Cidade"] }, { $not : "$name" }, { $eq: ["$name", "maria"] }]},
+               then: "$$DESCEND",
+               else: "$$PRUNE"
+           }
+          }}])
+
+//DONE: fix or parameters - when there are primary fields in the projection, documents that do not have the secondary fields specified will not show
+//fixed by removing match parameter.
+db.points.aggregate([
+          { $match: {}},
+          { $redact : {
+           $cond: {
+            if: { $or : [{ $not : "$name" }, { $eq: ["$name", "maria"] }]},
+               then: "$$DESCEND",
+               else: "$$PRUNE"
+           }
+          }}])
+
+db.points.aggregate([
+          { $match: {}},
+	  {
+            $project: {_id :1, fields: 1}
+          },
+          { $redact : {
+           $cond: {
+            if: { $or : [{ $not : "$name" }, { $not : "$group" }, { $eq: ["$name", "maria"] }]},
+               then: "$$DESCEND",
+               else: "$$PRUNE"
+           }
+          }}])
+
+
+//DONE: verify if search retrieves documents that dont have some of the secondary fields specified
+
+
+db.test.find(
+    {}, 
+    {_id: 0, fields: {$elemMatch: {name: "Cidade"}}});
+
+
+//DONE: verify the need of an aggregation on one-element queries
+db.points.find({$or: {"fields.name" : "Cidade_teste", "fields.name" : "Estado_teste"}}, {"shapes.$" : 1})
+//yeaaah, better leave it this way. $match will return only one element anyway.
+
+//DONE: avoid returning empty "fields"
+
+//TODO: verify if aggregation $filter supports nested fields
+db.points.aggregate([
+          { $match: {}},
+          { $redact : {
+           $cond: {
+            if: { $or : [{ $not : "$name" }, { $eq: ["$name", "maria"] }]},
+               then: "$$DESCEND",
+               else: "$$PRUNE"
+           }
+          }}])
+
+
+
+db.points.aggregate([
+    {$match: {'fields.name': 'Contato'}},
+    {$project: {
+        fields: {$filter: {
+            input: '$fields',
+            as: 'field',
+            cond: { $eq:['$$field.value.name', 'ID do Contato'] }
+        }}
+    }}
+])
+
+db.points.aggregate([
+    {$project: {
+        fields: {$filter: {
+            input: '$fields',
+            as: 'field',
+            cond: { $and: [
+		{$eq: ['$$field.name', 'Contato']},
+		
+		]}
+        }}
+    }}
+])
+
+db.points.aggregate([
+    {$match: {'fields.name': 'Contato'}},
+    {$project: {
+        fields: {$filter: {
+            input: {$filter: {
+		    input: '$',
+		    as: 'f',
+		    cond: { $and: [
+			{$eq: ['$$f.value.name', 'ID do Contato']}
+			]},
+            as: 'field',
+            cond: { $and: [
+		{$eq: ['$$field.name', 'Contato']}
+		]}
+	    }}
+        }}
+    }}
+])
+
+
+//DONE: try this: http://stackoverflow.com/questions/24148710/project-to-filter-property-within-second-nested-array
+//doesnt work because fields.value is not always an array
+//probably won't work for 1st level fields, abort
+db.points.aggregate([
+    { "$project": {
+        "_id": 1,
+        "fields": {
+            "$map": {
+                "input": "$fields",
+                "as": "f",
+                "in": {
+                    "$ifNull": [
+                        { 
+                            "name": "$Subredes", //fields.Subredes
+			    "type": "$Multifield",
+                            "value": {
+                                "$map": {
+                                    "input": "$$f.value",
+                                    "as": "v",
+                                    "in": {
+                                        "$ifNull": [
+                                            { "name": "$Gateway"},
+                                            false
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        false
+                    ]
+                }
+            }
+        }
+    }}
+])
+
+db.points.aggregate([
+    { "$project": {
+        "_id": 1,
+        "fields": {
+            "$map": {
+                "input": "$fields",
+                "as": "f",
+                "in": {
+                    "$ifNull": [
+                        {
+                            "name": "$Subredes", //fields.Subredes
+			    "type": "$Multifield"
+                        },
+                        false
+                    ]
+                }
+            }
+        }
+    }}
+])
+
+db.points.aggregate([
+    { "$project": {
+        "_id": 1,
+        "fields": {
+            "$map": {
+                "input": "$fields",
+                "as": "f",
+                "in": {
+		    "$ifNull": [
+                        {
+			    "type": "$multifield"
+                        },
+                        false
+                    ]
+                }
+            }
+        }
+    }}
+])
+
+db.points.aggregate([
+    { "$project": {
+        "_id": 1,
+        "fields": {
+            "$map": {
+                "input": "$fields",
+                "as": "f",
+                "in": {
+                    "$ifNull": [
+                        { 
+                            "name": "$Subredes", //fields.Subredes
+			    "type": "$Multifield",
+                            "value": {
+                                "$map": {
+                                    "input": "$$f.value",
+                                    "as": "v",
+                                    "in": {
+                                        "$ifNull": [
+                                            { "name": "$Gateway"},
+                                            false
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        false
+                    ]
+                }
+            }
+        }
+    }}
+])
+

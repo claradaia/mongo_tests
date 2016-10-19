@@ -1,0 +1,35 @@
+{_id: 104,
+ fields_spec:
+   [
+      {
+        "type": "text",
+        "name": "Cidade_teste",
+	"key": "cidade_teste",
+        "description": "Nome da Cidade",
+        "group": "CEP",
+        "public": false
+      },
+      {
+        "type": "text",
+        "name": "Telefone",
+        "key": "telefone",
+        "description": "Número do telefone",
+        "group": "Contato",
+        "public": false
+      },
+      {
+        "type": "integer",
+        "name": "Número de Máquinas",
+        "key": "numero_de_maquinas",
+        "value": 17,
+        "description": "Inventário",
+        "group": "Inventário",
+        "public": false
+      }
+   ],
+ fields: {cidade_teste: "Poti-poti Perna-de-Pau",
+ telefone: "32225454",
+ numero_de_maquinas: 17}
+}
+
+{"cidade_teste": 1}

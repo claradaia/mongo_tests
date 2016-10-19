@@ -1,0 +1,21 @@
+{"_id": 31,
+ "fields":
+   [
+      {
+        "type": "text",
+        "name": "Cidade_teste",
+        "value": "Paranaguá",
+        "description": "Nome da Cidade",
+        "group": "CEP",
+        "public": false
+      },
+      {
+        "type": "text",
+        "name": "Estado_teste",
+        "value": "Paraná",
+        "description": "Nome do Estado",
+        "group": "CEP",
+        "public": false
+      }
+   ]
+}

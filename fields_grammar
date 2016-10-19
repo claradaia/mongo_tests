@@ -1,0 +1,19 @@
+fieldString = w:(iw:field comma? {return iw})* {return w}
+field = nf: nested_field {return nf;}
+	  / field: word { return field; }
+nested_field = field2:(b:word+ c:nested {
+                        var a = {};
+                        if (c)
+                        	a[b] = c;
+                        else
+                        	a = b;
+               			return a;})
+               		 {return field2;} 
+nested = open_curly close_curly {return;}
+		 /open_curly c:fieldString close_curly {return c}
+	   
+word = a:(letter+) {return a.join("")}
+letter = [a-zA-Z0-9 ]
+comma = ","
+open_curly = "{"
+close_curly = "}"

@@ -1,0 +1,13 @@
+{"_id": 4,
+ "fields":
+   [
+      {
+	"type": "text",
+	"name": "Cor do lugar",
+	"value": "Amarelo",
+	"description": "Cor do estabelecimento",
+	"group": "Info inuteis",
+	"public": false
+      }
+   ]
+}

@@ -1,0 +1,38 @@
+p	s	g
+0	0	0	
+0	0	1	?groups=Contato
+0	1	0	?fields=E-mail
+0	1	1	?fields=Telefone&groups=CEP,Inventário
+1	0	0	?fields=active,tags
+1	0	1	?fields=id&groups=Contato
+1	1	0	?fields=id,tags
+1	1	1	?fields=id,tags,Estado
+
+
+db.points.find({ "fields_spec.group": { $in: [ "Contato", "Inventário" ] } },{ _id: 0, "fields_spec.key": 1}) //returns fields that were not specified
+
+db.points.aggregate([
+   {
+      $project: {
+         "fields_spec": {
+            $filter: {
+               input: "$fields_spec",
+               as: "field",
+               cond: { $or: [ {$eq: ["$$field.group", "Contato"]}, {$eq: ["$$field.group", "Inventário"]} ] }
+            },
+	    "_id": 0,
+            "fields_spec.key": 1
+         }
+      }
+   }
+])
+
+if (fieldGroups) {
+        // If field groups are specified, search for all fields belongin to any
+        // of the groups using the aggregation $project operator
+        var orParameters = []; //params for $cond
+        Point.find({ "fields_spec.group": { $in : fieldGroups } }, //filter groups
+        {})
+        
+    }
+    
